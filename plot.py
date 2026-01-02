@@ -14,7 +14,7 @@ def calculate_kdj(df:pd.DataFrame, n=9, m1=3, m2=3):
     return df
 
 
-def plot_interactive_stock(table_name):
+def make_stock_figure(table_name):
     conn = sqlite3.connect("stock_data.db")
     query = f"""
         SELECT * FROM {table_name}
@@ -36,7 +36,7 @@ def plot_interactive_stock(table_name):
     fig = make_subplots(rows=3, cols=1,
                         shared_xaxes=True, 
                         vertical_spacing=0.03,
-                        subplot_titles=(f'{table_name} K-Line', 'Volume', 'KDJ'),
+                        subplot_titles=(f'{table_name}', 'Volume', 'KDJ'),
                         row_width=[0.3, 0.2, 0.5])
     
     # Row 1 K Line
@@ -67,20 +67,23 @@ def plot_interactive_stock(table_name):
     fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['D'], line=dict(color='orange', width=1), name='D'), row=3, col=1)
     fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['J'], line=dict(color='purple', width=1), name='J'), row=3, col=1)
 
-    # Add KDJ threshold lines (20 and 80 are standard)
     fig.add_hline(y=80, line_dash="dot", line_color="red", row=3, col=1)
     fig.add_hline(y=13, line_dash="dot", line_color="green", row=3, col=1)
 
     fig.update_layout(
-        title=f'Interactive Analysis: {table_name}',
-        xaxis_rangeslider_visible=False, # Slider usually belongs on the bottom axis
+        #title=f'Interactive Analysis: {table_name}',
+        xaxis_rangeslider_visible=False,
         height=1000,
         template='plotly',
     )
     fig.update_xaxes(type='category',showticklabels=False)
     fig.update_xaxes(rangeslider_visible=False, row=2, col=1)
     fig.update_xaxes(rangeslider_visible=True, row=3, col=1)   
-    
-    fig.show()
 
-plot_interactive_stock("江西铜业")
+    return fig
+
+def plot_interactive_stock():
+    fg = make_stock_figure("江西铜业")
+    fg.show()
+
+#plot_interactive_stock()
