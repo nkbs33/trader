@@ -1,4 +1,6 @@
+# A-Share Trading Visualization
+做着玩的
 
-stock_zh_a_spot_em
-实时数据
+## 界面
+![A-Share Trade](a-trade.jpg)
 

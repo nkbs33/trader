@@ -90,6 +90,7 @@ def make_stock_figure(stock, day_count=60):
     fig.update_layout(
         xaxis_rangeslider_visible=False,
         height=1000,
+        width=800,
         template='plotly',
     )
     fig.update_xaxes(type='category', showticklabels=False)
