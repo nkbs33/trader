@@ -22,7 +22,7 @@ def make_stock_figure(stock, day_count=60):
         ORDER BY 日期 DESC
         LIMIT ?
     """
-    df = pd.read_sql(query, conn, params=(stock, day_count))
+    df = pd.read_sql(query, conn, params=(stock, day_count+30))
     conn.close()
 
     df["日期"] = pd.to_datetime(df["日期"])
@@ -30,6 +30,8 @@ def make_stock_figure(stock, day_count=60):
 
     df['MA10'] = df['收盘'].rolling(window=10).mean()
     df = calculate_kdj(df)
+
+    df = df.tail(day_count)
 
     df['Date_Str'] = df['日期'].dt.strftime('%Y-%m-%d')
 
@@ -61,6 +63,20 @@ def make_stock_figure(stock, day_count=60):
         marker_color=vol_colors,
         name='Volume',
         showlegend=False,
+    ), row=2, col=1)
+
+    # Mark high volume days (volume > 2x previous day)
+    df['prev_volume'] = df['成交量'].shift(1)
+    high_vol_mask = df['成交量'] > 2 * df['prev_volume']
+    high_vol_dates = df.loc[high_vol_mask, 'Date_Str']
+    high_vol_values = df.loc[high_vol_mask, '成交量']
+    fig.add_trace(go.Scatter(
+        x=high_vol_dates,
+        y=high_vol_values,
+        mode='markers',
+        marker=dict(symbol='star', color='gold', size=12, line=dict(width=1, color='black')),
+        name='High Volume',
+        showlegend=True
     ), row=2, col=1)
 
     # Row 3 KDJ

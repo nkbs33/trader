@@ -1,4 +1,3 @@
-
 import sqlite3
 import pandas as pd
 import akshare as ak
@@ -80,9 +79,9 @@ class StockDatabase:
                 break
             time.sleep(sleep_sec)
     
-    def fetch_recent_stock_data(self, stock_code, day_count=30):
-        q = f"SELECT * FROM daily_data WHERE code = ? ORDER BY 日期 DESC LIMIT ?"
-        df = pd.read_sql(q, self.conn, params=(stock_code, day_count))
+    def get_daily_data(self, stock_name, day_count=30):
+        q = f"SELECT * FROM daily_data WHERE stock = ? ORDER BY 日期 DESC LIMIT ?"
+        df = pd.read_sql(q, self.conn, params=(stock_name, day_count))
         if df.empty:
             return df
         df["日期"] = pd.to_datetime(df["日期"])
@@ -135,6 +134,22 @@ class StockDatabase:
     def daily_update(self):
         self.download_stock_data()
         self.update_stock_info()
+
+    def get_market_value_by_code(self, code):
+        """
+        Returns the market value (mv) for the given stock code as a float.
+        Returns None if not found or not convertible.
+        """
+        cur = self.conn.cursor()
+        cur.execute("SELECT mv FROM stocks WHERE code = ?", (code,))
+        row = cur.fetchone()
+        if row and row[0] is not None:
+            try:
+                # Remove commas and convert to float
+                return float(str(row[0]).replace(',', ''))
+            except Exception:
+                return None
+        return None
 
 if __name__=='__main__':
     db = StockDatabase()
