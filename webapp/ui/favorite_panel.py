@@ -55,22 +55,14 @@ def on_favorite_click(n_clicks_list):
     return selected
 
 @callback(
-    Output('sidebar-content', 'children', allow_duplicate=True),
     Input('add-favorite-btn', 'n_clicks'),
     State('dropdown-selection', 'value'),
     State('sidebar-tabs', 'value'),
     prevent_initial_call=True
 )
 def add_to_favorites(n_clicks, value, tab):
-    from webapp.app import add_favorite
     if n_clicks and value:
         add_favorite(value)
-        if tab == 'favorite':
-            return draw_favorite_panel()
-        elif tab == 'recent':
-            return draw_favorite_panel()
-    raise dash.exceptions.PreventUpdate
-
 
 def add_favorite(query: str):
     conn = sqlite3.connect('stock_data.db')
@@ -82,6 +74,7 @@ def add_favorite(query: str):
             ts TEXT
         )
     ''')
+    cur.execute('DELETE FROM favorite_collection WHERE query = ?', (query,))
     cur.execute('INSERT INTO favorite_collection (query, ts) VALUES (?, ?)', (query, datetime.utcnow().isoformat()))
     conn.commit()
     conn.close()
