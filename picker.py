@@ -37,7 +37,7 @@ class StockPicker:
             except Exception:
                 continue
         conn.close()
-        csv_name = f"matches_{date.today().isoformat()}.csv"
+        csv_name = f"result/{date.today().isoformat()}.csv"
         pd.DataFrame(matches, columns=["name", "J"]).to_csv(csv_name, index=False)
 
 
