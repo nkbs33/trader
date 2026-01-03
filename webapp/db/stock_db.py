@@ -21,6 +21,7 @@ class StockDatabase:
     def get_a_share_list_local(self,):
         return pd.read_sql_query("SELECT code, name FROM stocks", self.conn)
 
+
     def fetch_and_save_all_daily_data(self, limit: Optional[int], start_date: str, end_date: str, sleep_sec: float):
         self.conn.execute(
             """
