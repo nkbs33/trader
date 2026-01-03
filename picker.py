@@ -3,7 +3,7 @@ import pandas as pd
 from plot import calculate_kdj
 from datetime import date
 
-from db_util import DatabaseUtil
+from stock_db import DatabaseUtil
 
 class StockUpdater:
     pass

@@ -10,7 +10,6 @@ import ast
 
 app = Dash()
 
-
 def add_recent_query(query: str):
     conn = sqlite3.connect('stock_data.db')
     cur = conn.cursor()
@@ -118,7 +117,6 @@ def on_recent_click(n_clicks_list):
         raise dash.exceptions.PreventUpdate
     selected = queries[idx]
     return selected
-
 
 if __name__ == '__main__':
     app.run(debug=True)

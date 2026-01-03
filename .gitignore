@@ -1,3 +1,4 @@
 ak_env/
 *.db
 result/
+*.pkl

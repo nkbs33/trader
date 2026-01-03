@@ -14,30 +14,30 @@ def calculate_kdj(df:pd.DataFrame, n=9, m1=3, m2=3):
     return df
 
 
-def make_stock_figure(table_name, day_count=60):
+def make_stock_figure(stock, day_count=60):
     conn = sqlite3.connect("stock_data.db")
     query = f"""
-        SELECT * FROM {table_name}
+        SELECT 日期, 开盘, 最高, 最低, 收盘, 成交量 FROM daily_data
+        WHERE stock = ?
         ORDER BY 日期 DESC
-        LIMIT {day_count}
+        LIMIT ?
     """
-    df = pd.read_sql(query, conn)
+    df = pd.read_sql(query, conn, params=(stock, day_count))
     conn.close()
 
     df["日期"] = pd.to_datetime(df["日期"])
     df = df.sort_values("日期")
 
-    df = df[["日期","开盘", "最高", "最低", "收盘", "成交量"]]
     df['MA10'] = df['收盘'].rolling(window=10).mean()
     df = calculate_kdj(df)
 
     df['Date_Str'] = df['日期'].dt.strftime('%Y-%m-%d')
 
     fig = make_subplots(rows=3, cols=1,
-                        shared_xaxes=True, 
+                        shared_xaxes=True,
                         vertical_spacing=0.03,
                         row_width=[0.3, 0.2, 0.5])
-    
+
     # Row 1 K Line
     fig.add_trace(go.Candlestick(
         x=df['Date_Str'],
@@ -49,16 +49,15 @@ def make_stock_figure(table_name, day_count=60):
     ), row=1, col=1)
 
     fig.add_trace(go.Scatter(
-        x=df['Date_Str'], y=df['MA10'], 
-        line=dict(color='blue', width=1), 
+        x=df['Date_Str'], y=df['MA10'],
+        line=dict(color='blue', width=1),
         name='MA10'
     ), row=1, col=1)
-    
+
     # Row 2 Volume
-    # color volume bars to match candlestick direction: red when close>=open, else green
     vol_colors = ['red' if c >= o else 'green' for c, o in zip(df['收盘'], df['开盘'])]
     fig.add_trace(go.Bar(
-        x=df['Date_Str'], y=df['成交量'], 
+        x=df['Date_Str'], y=df['成交量'],
         marker_color=vol_colors,
         name='Volume',
         showlegend=False,
@@ -73,12 +72,11 @@ def make_stock_figure(table_name, day_count=60):
     fig.add_hline(y=13, line_dash="dot", line_color="green", row=3, col=1)
 
     fig.update_layout(
-        #title=f'Interactive Analysis: {table_name}',
         xaxis_rangeslider_visible=False,
         height=1000,
         template='plotly',
     )
-    fig.update_xaxes(type='category',showticklabels=False)
+    fig.update_xaxes(type='category', showticklabels=False)
 
     return fig
 
