@@ -14,12 +14,12 @@ def calculate_kdj(df:pd.DataFrame, n=9, m1=3, m2=3):
     return df
 
 
-def make_stock_figure(table_name):
+def make_stock_figure(table_name, day_count=60):
     conn = sqlite3.connect("stock_data.db")
     query = f"""
         SELECT * FROM {table_name}
         ORDER BY 日期 DESC
-        LIMIT 180
+        LIMIT {day_count}
     """
     df = pd.read_sql(query, conn)
     conn.close()
@@ -36,7 +36,6 @@ def make_stock_figure(table_name):
     fig = make_subplots(rows=3, cols=1,
                         shared_xaxes=True, 
                         vertical_spacing=0.03,
-                        subplot_titles=(f'{table_name}', 'Volume', 'KDJ'),
                         row_width=[0.3, 0.2, 0.5])
     
     # Row 1 K Line
@@ -56,10 +55,13 @@ def make_stock_figure(table_name):
     ), row=1, col=1)
     
     # Row 2 Volume
+    # color volume bars to match candlestick direction: red when close>=open, else green
+    vol_colors = ['red' if c >= o else 'green' for c, o in zip(df['收盘'], df['开盘'])]
     fig.add_trace(go.Bar(
         x=df['Date_Str'], y=df['成交量'], 
-        marker_color='orange', 
-        name='Volume'
+        marker_color=vol_colors,
+        name='Volume',
+        showlegend=False,
     ), row=2, col=1)
 
     # Row 3 KDJ
@@ -77,8 +79,6 @@ def make_stock_figure(table_name):
         template='plotly',
     )
     fig.update_xaxes(type='category',showticklabels=False)
-    fig.update_xaxes(rangeslider_visible=False, row=2, col=1)
-    fig.update_xaxes(rangeslider_visible=True, row=3, col=1)   
 
     return fig
 
