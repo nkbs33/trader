@@ -13,23 +13,33 @@ def calculate_kdj(df:pd.DataFrame, n=9, m1=3, m2=3):
     df['J'] = 3 * df['K'] - 2 * df['D']
     return df
 
+def double_line(df:pd.DataFrame):
+    short = df['收盘'].ewm(span=10).mean()
+    short = short.ewm(span=10).mean()
+    df['short'] = short
+    long = (df['收盘'].ewm(span=14).mean() + df['收盘'].ewm(span=28).mean()
+            + df['收盘'].ewm(span=57).mean() + df['收盘'].ewm(span=114).mean())*0.25
+    df['long'] = long
+    return df
+
 
 def make_stock_figure(stock, day_count=60):
     conn = sqlite3.connect("stock_data.db")
     query = f"""
-        SELECT 日期, 开盘, 最高, 最低, 收盘, 成交量 FROM daily_data
+        SELECT 日期, 开盘, 最高, 最低, 收盘, 成交量, 涨跌幅, 振幅 FROM daily_data
         WHERE stock = ?
         ORDER BY 日期 DESC
         LIMIT ?
     """
-    df = pd.read_sql(query, conn, params=(stock, day_count+30))
+    df = pd.read_sql(query, conn, params=(stock, day_count+120))
     conn.close()
 
     df["日期"] = pd.to_datetime(df["日期"])
     df = df.sort_values("日期")
 
-    df['MA10'] = df['收盘'].rolling(window=10).mean()
+    # df['MA10'] = df['收盘'].rolling(window=10).mean()
     df = calculate_kdj(df)
+    df = double_line(df)
 
     df = df.tail(day_count)
 
@@ -41,19 +51,36 @@ def make_stock_figure(stock, day_count=60):
                         row_width=[0.3, 0.2, 0.5])
 
     # Row 1 K Line
+    # Add custom hovertemplate to show 涨跌幅
+    hovertemplate = (
+        '日期: %{x}<br>' +
+        '开盘: %{open}<br>' +
+        '最高: %{high}<br>' +
+        '最低: %{low}<br>' +
+        '收盘: %{close}<br>' +
+        '涨跌幅: %{customdata[0]:.2f}%<br>'+
+        '振幅: %{customdata[1]:.2f}%'
+    )
     fig.add_trace(go.Candlestick(
         x=df['Date_Str'],
         open=df['开盘'], high=df['最高'],
         low=df['最低'], close=df['收盘'],
         name='K-Line',
         increasing_line_color='red', increasing_fillcolor='red',
-        decreasing_line_color='green', decreasing_fillcolor='green'
+        decreasing_line_color='green', decreasing_fillcolor='green',
+        customdata=list(zip(df['涨跌幅'], df['振幅'])),
+        hovertemplate=hovertemplate
     ), row=1, col=1)
 
     fig.add_trace(go.Scatter(
-        x=df['Date_Str'], y=df['MA10'],
-        line=dict(color='blue', width=1),
-        name='MA10'
+        x=df['Date_Str'], y=df['short'],
+        line=dict(color='white', width=1),
+        name='短线'
+    ), row=1, col=1)
+    fig.add_trace(go.Scatter(
+        x=df['Date_Str'], y=df['long'],
+        line=dict(color='#D4A135', width=1),
+        name='主力'
     ), row=1, col=1)
 
     # Row 2 Volume
@@ -91,7 +118,58 @@ def make_stock_figure(stock, day_count=60):
         xaxis_rangeslider_visible=False,
         height=1000,
         width=800,
-        template='plotly',
+        template='plotly_dark',
+        paper_bgcolor='#222222',
+        plot_bgcolor='#222222',
+        xaxis=dict(
+            showspikes=True,
+            spikemode='across',
+            spikesnap='cursor',
+            spikethickness=1,
+            spikecolor='rgba(0,0,0,0.5)',
+            spikedash='solid',
+        ),
+        xaxis2=dict(
+            showspikes=True,
+            spikemode='across',
+            spikesnap='cursor',
+            spikethickness=1,
+            spikecolor='rgba(0,0,0,0.5)',
+            spikedash='solid',
+        ),
+        xaxis3=dict(
+            showspikes=True,
+            spikemode='across',
+            spikesnap='cursor',
+            spikethickness=1,
+            spikecolor='rgba(0,0,0,0.5)',
+            spikedash='solid',
+        ),
+        yaxis=dict(
+            showspikes=True,
+            spikemode='across',
+            spikesnap='cursor',
+            spikethickness=1,
+            spikecolor='rgba(0,0,0,0.5)',
+            spikedash='solid',
+        ),
+        yaxis2=dict(
+            showspikes=True,
+            spikemode='across',
+            spikesnap='cursor',
+            spikethickness=1,
+            spikecolor='rgba(0,0,0,0.5)',
+            spikedash='solid',
+        ),
+        yaxis3=dict(
+            showspikes=True,
+            spikemode='across',
+            spikesnap='cursor',
+            spikethickness=1,
+            spikecolor='rgba(0,0,0,0.5)',
+            spikedash='solid',
+        ),
+        hovermode='x',
     )
     fig.update_xaxes(type='category', showticklabels=False)
 

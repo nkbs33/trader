@@ -48,11 +48,11 @@ def draw_recent_panel(limit=10):
     for i, (_, row) in enumerate(df.iterrows()):
         q = f"{row['query']}"
         label = f"{row['query']}  ({row['ts']})"
-        btn = html.Button(label, id={'type': 'recent-query', 'index': i}, n_clicks=0, style={'width': '100%', 'textAlign': 'left', 'border': 'none', 'background': 'none', 'padding': '6px 0'})
-        items.append(html.Li(btn))
+        btn = html.Button(label, id={'type': 'recent-query', 'index': i}, n_clicks=0, style={'width': '100%', 'textAlign': 'left', 'border': 'none', 'background': '#222', 'color': '#f5f5f5', 'padding': '6px 0'})
+        items.append(html.Li(btn, style={'background': '#181818', 'color': '#f5f5f5', 'marginBottom': '2px'}))
     if not items:
-        return html.Div("No recent queries yet.")
-    return html.Ul(items)
+        return html.Div("No recent queries yet.", style={'color': '#888'})
+    return html.Ul(items, style={'background': '#181818', 'color': '#f5f5f5', 'padding': '0', 'listStyle': 'none'})
 
 @callback(
     Output('dropdown-selection', 'value', allow_duplicate=True),

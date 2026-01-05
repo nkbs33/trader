@@ -22,7 +22,7 @@ class StockPicker:
             code = str(row['code']).strip()
             name = str(row['name']).strip()
 
-            df = self.db.get_daily_data(name, day_count=day_count)
+            df = self.db.query_daily_data(name, day_count=day_count)
             df = df[self.db.candle_columns]
             df = calculate_kdj(df)
             
@@ -67,7 +67,7 @@ class StockPicker:
 
 if __name__ == "__main__":
     picker = StockPicker()
-    df = picker.db.get_daily_data('江西铜业', 60)
+    df = picker.db.query_daily_data('江西铜业', 60)
     print(StockPicker.detect_high_volume_days(df))
     
 

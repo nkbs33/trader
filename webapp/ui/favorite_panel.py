@@ -19,12 +19,12 @@ def draw_favorite_panel(limit=20):
     for i, (_, row) in enumerate(df.iterrows()):
         q = f"{row['query']}"
         label = f"{row['query']}  ({row['ts']})"
-        btn = html.Button(label, id={'type': 'favorite-query', 'index': i}, n_clicks=0, style={'width': '70%', 'textAlign': 'left', 'border': 'none', 'background': 'none', 'padding': '6px 0'})
-        remove_btn = html.Button('Remove', id={'type': 'remove-favorite', 'index': i}, n_clicks=0, style={'marginLeft': '8px', 'color': 'red'})
-        items.append(html.Li([btn, remove_btn], style={'display': 'flex', 'alignItems': 'center'}))
+        btn = html.Button(label, id={'type': 'favorite-query', 'index': i}, n_clicks=0, style={'width': '70%', 'textAlign': 'left', 'border': 'none', 'background': '#222', 'color': '#f5f5f5', 'padding': '6px 0'} )
+        remove_btn = html.Button('Remove', id={'type': 'remove-favorite', 'index': i}, n_clicks=0, style={'marginLeft': '8px', 'color': '#FF5555', 'background': '#222', 'border': 'none'})
+        items.append(html.Li([btn, remove_btn], style={'display': 'flex', 'alignItems': 'center', 'background': '#181818', 'color': '#f5f5f5', 'marginBottom': '2px'}))
     if not items:
-        return html.Div("No favorites yet.")
-    return html.Ul(items)
+        return html.Div("No favorites yet.", style={'color': '#888'})
+    return html.Ul(items, style={'background': '#181818', 'color': '#f5f5f5', 'padding': '0', 'listStyle': 'none'})
 
 @callback(
     Output('dropdown-selection', 'value', allow_duplicate=True),
@@ -41,6 +41,8 @@ def on_favorite_click(n_clicks_list):
         idx = int(triggered_obj.get('index', 0))
     except Exception:
         raise dash.exceptions.PreventUpdate
+    if not n_clicks_list or idx >= len(n_clicks_list) or n_clicks_list[idx] is None or n_clicks_list[idx] <= 0:
+        raise dash.exceptions.PreventUpdate
     conn = sqlite3.connect('stock_data.db')
     try:
         df = pd.read_sql_query(f"SELECT query FROM favorite_collection ORDER BY id DESC LIMIT 20", conn)
@@ -55,6 +57,7 @@ def on_favorite_click(n_clicks_list):
     return selected
 
 @callback(
+    Output('sidebar-content', 'children', allow_duplicate=True),
     Input('add-favorite-btn', 'n_clicks'),
     State('dropdown-selection', 'value'),
     State('sidebar-tabs', 'value'),
@@ -63,6 +66,7 @@ def on_favorite_click(n_clicks_list):
 def add_to_favorites(n_clicks, value, tab):
     if n_clicks and value:
         add_favorite(value)
+        return draw_favorite_panel()
 
 def add_favorite(query: str):
     conn = sqlite3.connect('stock_data.db')

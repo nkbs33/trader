@@ -2,18 +2,19 @@ from dash import Dash, html, dcc, callback, Output, Input
 from webapp.ui.sidebar import get_sidebar_layout
 from webapp.ui.plot import make_stock_figure
 
-app = Dash()
+app = Dash(suppress_callback_exceptions=True)
 
 # Sidebar with tabs
 app.layout = html.Div([
+    # Inject global dark background for html and body
     get_sidebar_layout(),
     html.Div([
-        html.H1(children='A股量化系统', style={'textAlign': 'center'}),
-        dcc.Input(value='江西铜业', id='dropdown-selection', type='text', debounce=True, placeholder='输入股票名称或代码', style={'width': '320px'}),
-        html.Button('Add to Favorites', id='add-favorite-btn', n_clicks=0, style={'marginLeft': '10px'}),
-        dcc.Graph(id='graph-content')
-    ], style={'flex': '1', 'padding': '10px'})
-], style={'display': 'flex', 'height': '100vh'})
+        # html.H1(children='A股量化系统', style={'textAlign': 'center', 'color': '#f5f5f5'}),
+        dcc.Input(value='江西铜业', id='dropdown-selection', type='text', debounce=True, placeholder='输入股票名称或代码', style={'width': '320px', 'backgroundColor': '#222', 'color': '#f5f5f5', 'border': '1px solid #444'}),
+        html.Button('Add to Favorites', id='add-favorite-btn', n_clicks=0, style={'marginLeft': '10px', 'backgroundColor': '#333', 'color': '#f5f5f5', 'border': '1px solid #444'}),
+        dcc.Graph(id='graph-content'),
+    ], style={'flex': '1', 'padding': '10px', 'backgroundColor': '#181818', 'color': '#f5f5f5'})
+], style={'display': 'flex', 'height': '100vh', 'backgroundColor': '#111', 'color': '#f5f5f5'})
 
 @callback(
     Output('graph-content', 'figure'),

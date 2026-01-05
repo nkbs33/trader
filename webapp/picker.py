@@ -22,7 +22,7 @@ class StockPicker:
             code = str(row['code']).strip()
             name = str(row['name']).strip()
 
-            df = self.db.get_daily_data(name, day_count=day_count)
+            df = self.db.query_daily_data(name, day_count=day_count)
             df = df[self.db.candle_columns]
             df = calculate_kdj(df)
             
@@ -67,18 +67,17 @@ class StockPicker:
 
 if __name__ == "__main__":
     picker = StockPicker()
-    df = picker.db.get_daily_data('江西铜业', 60)
-    print(StockPicker.detect_high_volume_days(df))
+    # df = picker.db.query_daily_data('江西铜业', 60)
+    # print(StockPicker.detect_high_volume_days(df))
     
-
-    # cols = ["code", "name"]
-    # matches,cols = picker.find_stocks_with_j_below(cols, threshold=12)
-    # matches,cols = picker.filter_by_market_value(matches, cols, min_value=80_0000_0000)
+    cols = ["code", "name"]
+    matches,cols = picker.find_stocks_with_j_below(cols, threshold=12)
+    matches,cols = picker.filter_by_market_value(matches, cols, min_value=80_0000_0000)
     
-    # df = pd.DataFrame(matches, columns=cols)
-    # float_cols = [col for col in ["J", "market_value"] if col in df.columns]
-    # df[float_cols] = df[float_cols].astype(float).round(2)
-    # csv_name = f"result/{date.today().isoformat()}.csv"
-    # df.to_csv(csv_name, index=False)
+    df = pd.DataFrame(matches, columns=cols)
+    float_cols = [col for col in ["J", "market_value"] if col in df.columns]
+    df[float_cols] = df[float_cols].astype(float).round(2)
+    csv_name = f"result/{date.today().isoformat()}.csv"
+    df.to_csv(csv_name, index=False)
     
 
