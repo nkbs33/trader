@@ -42,9 +42,9 @@ if __name__ == '__main__':
         if len(sys.argv) < 3:
             print("provide db command")
             exit()
+        db = StockDatabase()
         if sys.argv[2] == 'fetch':
             limit = None
-            db = StockDatabase()
             if len(sys.argv) > 3:
                 try:
                     limit = int(sys.argv[3])
