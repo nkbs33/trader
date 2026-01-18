@@ -1,6 +1,7 @@
 from dash import Dash, html, dcc, callback, Output, Input
 from webapp.ui.sidebar import get_sidebar_layout
 from webapp.ui.plot import make_stock_figure
+from webapp.db.stock_db import StockDatabase
 
 app = Dash(suppress_callback_exceptions=True)
 
@@ -31,4 +32,25 @@ def update_graph(value, tab):
     return fig
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    import sys
+    
+    if len(sys.argv) < 2:
+        print("Usage: python stock_db.py <command>")
+        print("Commands:")
+        print("  fetch [limit]   Run fetch_daily_data, optionally limit number of stocks")
+        print("  run     Run app server")
+        sys.exit(1)
+    
+    cmd = sys.argv[1]
+    if cmd == "fetch":
+        limit = None
+        db = StockDatabase()
+        if len(sys.argv) > 2:
+            try:
+                limit = int(sys.argv[2])
+            except Exception:
+                print("Invalid limit, using all stocks.")
+                limit = None
+        db.fetch_daily_data(limit=limit, sleep_sec=0.1)
+    elif cmd == "run":
+        app.run(debug=True)

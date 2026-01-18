@@ -94,6 +94,8 @@ class StockDatabase:
                 最低 REAL,
                 收盘 REAL,
                 成交量 REAL,
+                涨跌幅 REAL,
+                振幅 REAL,
                 PRIMARY KEY(stock, 日期)
             )
             """
@@ -124,7 +126,7 @@ class StockDatabase:
                 continue
             try:
                 print(f"[{i}/{total}] Fetching {code} {name} from {start_date} to {end_date}...", end=" ")
-                hist = ak.stock_zh_a_hist(
+                hist:pd.DataFrame = ak.stock_zh_a_hist(
                     symbol=code,
                     period="daily",
                     start_date=start_date,
@@ -133,7 +135,7 @@ class StockDatabase:
                 )
                 # print(hist)
                 if isinstance(hist, pd.DataFrame) and not hist.empty:
-                    required_cols = ["日期", "开盘", "最高", "最低", "收盘", "成交量"]
+                    required_cols = ["日期", "开盘", "最高", "最低", "收盘", "成交量", "涨跌幅", "振幅"]
                     if not all(col in hist.columns for col in required_cols):
                         print("missing columns; skipped")
                         continue
@@ -141,7 +143,6 @@ class StockDatabase:
                     hist["stock"] = name
                     # Reorder columns to match table
                     hist = hist[["stock"] + required_cols]
-                    # Insert into daily_data
                     hist.to_sql("daily_data", self.conn, if_exists="append", index=False)
                     print("saved to daily_data")
                 else:
@@ -275,7 +276,7 @@ if __name__=='__main__':
             except Exception:
                 print("Invalid limit, using all stocks.")
                 limit = None
-        db.fetch_daily_data(limit=limit, sleep_sec=0.1)
+        db.fetch_daily_data(limit=limit, sleep_sec=0.01)
     elif cmd == "info" and len(sys.argv) > 2:
         code = sys.argv[2]
         print(db.get_stock_detailed_info(code))
