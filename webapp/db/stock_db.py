@@ -260,12 +260,7 @@ class StockDatabase:
 if __name__=='__main__':
     import sys
     db = StockDatabase()
-
     if len(sys.argv) < 2:
-        print("Usage: python stock_db.py <command>")
-        print("Commands:")
-        print("  fetch [limit]   Run fetch_daily_data, optionally limit number of stocks")
-        print("  info <code>     Show stock detailed info")
         sys.exit(1)
     cmd = sys.argv[1]
     if cmd == "fetch":

@@ -2,4 +2,5 @@ python -m venv ak_env
 source ak_env/bin/activate
 
 pip install akshare
+pip install dash
 pip install plotly

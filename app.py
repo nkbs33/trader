@@ -35,22 +35,25 @@ if __name__ == '__main__':
     import sys
     
     if len(sys.argv) < 2:
-        print("Usage: python stock_db.py <command>")
-        print("Commands:")
-        print("  fetch [limit]   Run fetch_daily_data, optionally limit number of stocks")
-        print("  run     Run app server")
         sys.exit(1)
     
     cmd = sys.argv[1]
-    if cmd == "fetch":
-        limit = None
-        db = StockDatabase()
-        if len(sys.argv) > 2:
-            try:
-                limit = int(sys.argv[2])
-            except Exception:
-                print("Invalid limit, using all stocks.")
-                limit = None
-        db.fetch_daily_data(limit=limit, sleep_sec=0.1)
+    if cmd == "db":
+        if len(sys.argv) < 3:
+            print("provide db command")
+            exit()
+        if sys.argv[2] == 'fetch':
+            limit = None
+            db = StockDatabase()
+            if len(sys.argv) > 3:
+                try:
+                    limit = int(sys.argv[3])
+                except Exception:
+                    print("Invalid limit, using all stocks.")
+                    limit = None
+            db.fetch_daily_data(limit=limit, sleep_sec=0.0)
+        if sys.argv[2] == 'get-list':
+            db.update_stock_info()
     elif cmd == "run":
         app.run(debug=True)
+
